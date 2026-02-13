@@ -3,13 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Face-Locked Servo Dashboard - Team01</title>
+    <title>Face-Servo Dashboard</title>
     
-    <!-- Chart.js for visualization -->
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0"></script>
-    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@1.0.1"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-streaming@2.0.0"></script>
     
     <style>
         * {
@@ -18,70 +15,94 @@
             box-sizing: border-box;
         }
         
+        :root {
+            --primary: #6366f1;
+            --secondary: #8b5cf6;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark-bg: #0f172a;
+            --darker-bg: #020617;
+            --card-bg: rgba(30, 41, 59, 0.8);
+            --border-color: rgba(71, 85, 105, 0.3);
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --text-tertiary: #94a3b8;
+        }
+        
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, var(--dark-bg), var(--darker-bg));
+            color: var(--text-primary);
+            overflow-x: hidden;
+            height: 100vh;
         }
         
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
+        .layout {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            grid-template-rows: 80px 1fr;
+            height: 100vh;
         }
         
-        header {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-        
-        h1 {
-            color: #333;
-            font-size: 2em;
-            margin-bottom: 10px;
-        }
-        
-        .status-bar {
+        /* Header */
+        .header {
+            grid-column: 1 / -1;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
             display: flex;
-            gap: 20px;
             align-items: center;
-            flex-wrap: wrap;
-            margin-top: 15px;
+            justify-content: space-between;
+            padding: 0 40px;
+            z-index: 100;
         }
         
-        .status-badge {
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 600;
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+        
+        .status-indicator {
             display: flex;
             align-items: center;
             gap: 8px;
+            padding: 8px 16px;
+            background: var(--card-bg);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
         }
         
-        .status-badge.connected {
-            background: #10b981;
-            color: white;
-        }
-        
-        .status-badge.disconnected {
-            background: #ef4444;
-            color: white;
-        }
-        
-        .status-badge.info {
-            background: #3b82f6;
-            color: white;
-        }
-        
-        .led {
-            width: 10px;
-            height: 10px;
+        .status-dot {
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
             animation: pulse 2s infinite;
+        }
+        
+        .status-dot.connected {
+            background: var(--success);
+        }
+        
+        .status-dot.disconnected {
+            background: var(--danger);
+            animation: none;
         }
         
         @keyframes pulse {
@@ -89,6 +110,74 @@
             50% { opacity: 0.5; }
         }
         
+        /* Sidebar */
+        .sidebar {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid var(--border-color);
+            padding: 30px 20px;
+            overflow-y: auto;
+        }
+        
+        .sidebar-section {
+            margin-bottom: 30px;
+        }
+        
+        .sidebar-title {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--text-tertiary);
+            margin-bottom: 12px;
+            letter-spacing: 0.5px;
+        }
+        
+        .sidebar-item {
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: var(--text-secondary);
+            font-size: 14px;
+            border-left: 3px solid transparent;
+        }
+        
+        .sidebar-item:hover {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+            border-left-color: var(--primary);
+        }
+        
+        .sidebar-item.active {
+            background: rgba(99, 102, 241, 0.15);
+            color: var(--primary);
+            border-left-color: var(--primary);
+        }
+        
+        /* Main Content */
+        .main {
+            overflow-y: auto;
+            padding: 40px;
+            background: var(--dark-bg);
+        }
+        
+        .content-header {
+            margin-bottom: 40px;
+        }
+        
+        .content-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        
+        .content-subtitle {
+            color: var(--text-tertiary);
+            font-size: 14px;
+        }
+        
+        /* Grid Layout */
         .grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -96,439 +185,666 @@
             margin-bottom: 20px;
         }
         
-        .card {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        .grid-2 {
+            grid-template-columns: repeat(2, 1fr);
         }
         
-        .card h2 {
-            color: #333;
-            font-size: 1.5em;
-            margin-bottom: 20px;
+        @media (max-width: 1200px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Cards */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            backdrop-filter: blur(20px);
+            transition: all 0.3s;
+        }
+        
+        .card:hover {
+            border-color: rgba(99, 102, 241, 0.5);
+            background: rgba(30, 41, 59, 0.95);
+        }
+        
+        .card-header {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
+            margin-bottom: 20px;
         }
         
-        .icon {
-            font-size: 1.2em;
+        .card-icon {
+            font-size: 24px;
+            width: 40px;
+            height: 40px;
+            background: rgba(99, 102, 241, 0.15);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
-        .data-display {
-            background: #f3f4f6;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 15px;
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        /* Data Display */
+        .data-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .data-row:last-child {
+            border-bottom: none;
         }
         
         .data-label {
-            color: #6b7280;
-            font-size: 0.9em;
-            margin-bottom: 5px;
+            color: var(--text-secondary);
+            font-size: 14px;
         }
         
         .data-value {
-            font-size: 2em;
-            font-weight: 700;
-            color: #333;
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--primary);
         }
         
-        .movement-indicator {
+        .data-value.success {
+            color: var(--success);
+        }
+        
+        .data-value.warning {
+            color: var(--warning);
+        }
+        
+        .data-value.danger {
+            color: var(--danger);
+        }
+        
+        /* Metrics Grid */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 16px;
+        }
+        
+        .metric-item {
+            background: rgba(99, 102, 241, 0.05);
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .metric-label {
+            color: var(--text-tertiary);
+            font-size: 12px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+        
+        .metric-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        
+        /* Visualization */
+        .visualization {
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 20px;
-            margin: 20px 0;
+            gap: 30px;
+            margin: 30px 0;
+            padding: 30px;
+            background: rgba(99, 102, 241, 0.05);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
         }
         
-        .arrow {
-            font-size: 3em;
-            opacity: 0.3;
+        .movement-arrow {
+            font-size: 48px;
+            opacity: 0.2;
             transition: all 0.3s;
         }
         
-        .arrow.active {
+        .movement-arrow.active {
             opacity: 1;
-            color: #3b82f6;
-            transform: scale(1.2);
+            color: var(--primary);
+            transform: scale(1.3);
+            filter: drop-shadow(0 0 10px var(--primary));
         }
         
-        .face-icon {
-            font-size: 4em;
+        .face-display {
+            font-size: 80px;
             transition: all 0.3s;
+            filter: drop-shadow(0 0 20px rgba(99, 102, 241, 0.3));
         }
         
-        .face-icon.active {
-            color: #10b981;
+        .face-display.detected {
+            filter: drop-shadow(0 0 20px rgba(16, 185, 129, 0.6));
         }
         
+        .face-display.lost {
+            opacity: 0.3;
+            transform: scale(0.8);
+        }
+        
+        /* Chart */
         .chart-container {
-            width: 100%;
+            position: relative;
             height: 300px;
             margin-top: 20px;
         }
         
-        .message-log {
-            background: #1f2937;
-            color: #10b981;
-            padding: 15px;
-            border-radius: 10px;
-            height: 200px;
-            overflow-y: auto;
-            font-family: 'Courier New', monospace;
-            font-size: 0.85em;
-        }
-        
-        .message-log div {
-            margin-bottom: 5px;
-            padding: 3px 0;
-            border-bottom: 1px solid #374151;
-        }
-        
-        .timestamp {
-            color: #6b7280;
-            margin-right: 10px;
-        }
-        
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin-top: 15px;
-        }
-        
-        .info-item {
-            background: #f9fafb;
-            padding: 12px;
+        /* Log */
+        .log-container {
+            background: rgba(1, 6, 23, 0.5);
+            border: 1px solid var(--border-color);
             border-radius: 8px;
+            padding: 12px;
+            height: 250px;
+            overflow-y: auto;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 12px;
         }
         
-        .info-item label {
-            display: block;
-            color: #6b7280;
-            font-size: 0.85em;
-            margin-bottom: 5px;
+        .log-entry {
+            padding: 6px 0;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            gap: 12px;
         }
         
-        .info-item value {
-            display: block;
-            color: #111827;
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+        
+        .log-time {
+            color: var(--text-tertiary);
+            white-space: nowrap;
+        }
+        
+        .log-message {
+            color: var(--text-secondary);
+            word-break: break-word;
+            flex: 1;
+        }
+        
+        .log-message.info {
+            color: var(--primary);
+        }
+        
+        .log-message.success {
+            color: var(--success);
+        }
+        
+        .log-message.error {
+            color: var(--danger);
+        }
+        
+        /* Badge */
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
             font-weight: 600;
-            font-size: 1.1em;
+        }
+        
+        .badge.primary {
+            background: rgba(99, 102, 241, 0.2);
+            color: var(--primary);
+        }
+        
+        .badge.success {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+        }
+        
+        .badge.danger {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+        }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(99, 102, 241, 0.05);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: rgba(99, 102, 241, 0.3);
+            border-radius: 3px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(99, 102, 241, 0.5);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                display: none;
+            }
+            
+            .header {
+                padding: 0 20px;
+            }
+            
+            .main {
+                padding: 20px;
+            }
+            
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .visualization {
+                flex-direction: column;
+                gap: 20px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>🎯 Face-Locked Servo System</h1>
-            <p style="color: #6b7280; margin-top: 5px;">Distributed Vision-Control Dashboard</p>
-            <div class="status-bar">
-                <div class="status-badge disconnected" id="ws-status">
-                    <div class="led" style="background: #ef4444;"></div>
-                    <span>Disconnected</span>
-                </div>
-                <div class="status-badge info">
-                    <span>Team: <strong id="team-id">team01</strong></span>
-                </div>
-                <div class="status-badge info">
-                    <span>Messages: <strong id="msg-count">0</strong></span>
+    <div class="layout">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-left">
+                <div class="logo">🎯 Face-Servo</div>
+            </div>
+            <div class="header-right">
+                <div class="status-indicator">
+                    <div class="status-dot disconnected" id="status-dot"></div>
+                    <span id="status-text">Disconnected</span>
                 </div>
             </div>
-        </header>
+        </div>
         
-        <div class="grid">
-            <!-- Movement Status Card -->
-            <div class="card">
-                <h2>
-                    <span class="icon">📹</span>
-                    Movement Status
-                </h2>
-                
-                <div class="movement-indicator">
-                    <div class="arrow" id="arrow-left">←</div>
-                    <div class="face-icon" id="face-icon">😊</div>
-                    <div class="arrow" id="arrow-right">→</div>
-                </div>
-                
-                <div class="data-display">
-                    <div class="data-label">Current Status</div>
-                    <div class="data-value" id="status-text">NO_FACE</div>
-                </div>
-                
-                <div class="info-grid">
-                    <div class="info-item">
-                        <label>Confidence</label>
-                        <value id="confidence">0.00</value>
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-section">
+                <div class="sidebar-title">Dashboard</div>
+                <div class="sidebar-item active">📊 Overview</div>
+                <div class="sidebar-item">📹 Live Feed</div>
+                <div class="sidebar-item">📈 Analytics</div>
+            </div>
+            
+            <div class="sidebar-section">
+                <div class="sidebar-title">System</div>
+                <div class="sidebar-item">⚙️ Settings</div>
+                <div class="sidebar-item">📝 Logs</div>
+                <div class="sidebar-item">🔧 Diagnostics</div>
+            </div>
+            
+            <div class="sidebar-section">
+                <div class="sidebar-title">Components</div>
+                <div class="sidebar-item">🖥️ Vision Node</div>
+                <div class="sidebar-item">📡 MQTT Broker</div>
+                <div class="sidebar-item">🤖 ESP8266</div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main">
+            <div class="content-header">
+                <h1 class="content-title">System Overview</h1>
+                <p class="content-subtitle">Real-time face tracking and servo control dashboard</p>
+            </div>
+            
+            <!-- Status Cards -->
+            <div class="grid">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon">🖥️</div>
+                        <div class="card-title">Vision Node</div>
                     </div>
-                    <div class="info-item">
-                        <label>Last Update</label>
-                        <value id="last-update">Never</value>
+                    <div class="data-row">
+                        <span class="data-label">Status</span>
+                        <span class="data-value" id="vision-status">Unknown</span>
+                    </div>
+                    <div class="data-row">
+                        <span class="data-label">FPS</span>
+                        <span class="data-value" id="vision-fps">0</span>
+                    </div>
+                    <div class="data-row">
+                        <span class="data-label">Last Heartbeat</span>
+                        <span class="data-value" id="vision-heartbeat">Never</span>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon">📡</div>
+                        <div class="card-title">MQTT Broker</div>
+                    </div>
+                    <div class="data-row">
+                        <span class="data-label">Status</span>
+                        <span class="data-value" id="mqtt-status">Unknown</span>
+                    </div>
+                    <div class="data-row">
+                        <span class="data-label">Messages/sec</span>
+                        <span class="data-value" id="mqtt-rate">0</span>
+                    </div>
+                    <div class="data-row">
+                        <span class="data-label">Connections</span>
+                        <span class="data-value" id="mqtt-connections">0</span>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon">🤖</div>
+                        <div class="card-title">ESP8266 Servo</div>
+                    </div>
+                    <div class="data-row">
+                        <span class="data-label">Status</span>
+                        <span class="data-value" id="esp-status">Unknown</span>
+                    </div>
+                    <div class="data-row">
+                        <span class="data-label">Servo Angle</span>
+                        <span class="data-value" id="servo-angle">90°</span>
+                    </div>
+                    <div class="data-row">
+                        <span class="data-label">Last Command</span>
+                        <span class="data-value" id="servo-command">–</span>
                     </div>
                 </div>
             </div>
             
-            <!-- System Info Card -->
+            <!-- Face Detection Visualization -->
             <div class="card">
-                <h2>
-                    <span class="icon">⚙️</span>
-                    System Information
-                </h2>
+                <div class="card-header">
+                    <div class="card-icon">😊</div>
+                    <div class="card-title">Face Detection</div>
+                </div>
                 
-                <div class="info-grid">
-                    <div class="info-item">
-                        <label>PC Vision Node</label>
-                        <value id="pc-status">Unknown</value>
+                <div class="visualization">
+                    <div class="movement-arrow" id="arrow-left">←</div>
+                    <div class="face-display lost" id="face-display">😊</div>
+                    <div class="movement-arrow" id="arrow-right">→</div>
+                </div>
+                
+                <div class="data-row">
+                    <span class="data-label">Detection Status</span>
+                    <span class="data-value" id="detection-status">NO_FACE</span>
+                </div>
+                
+                <div class="metrics-grid">
+                    <div class="metric-item">
+                        <div class="metric-label">Confidence</div>
+                        <div class="metric-value" id="confidence">0.00</div>
                     </div>
-                    <div class="info-item">
-                        <label>ESP8266 Controller</label>
-                        <value id="esp-status">Unknown</value>
+                    <div class="metric-item">
+                        <div class="metric-label">Face Position</div>
+                        <div class="metric-value" id="face-position">–</div>
                     </div>
-                    <div class="info-item">
-                        <label>Servo Angle</label>
-                        <value id="servo-angle">90°</value>
+                    <div class="metric-item">
+                        <div class="metric-label">Center Distance</div>
+                        <div class="metric-value" id="center-distance">–</div>
                     </div>
-                    <div class="info-item">
-                        <label>Uptime</label>
-                        <value id="uptime">0s</value>
+                    <div class="metric-item">
+                        <div class="metric-label">Last Update</div>
+                        <div class="metric-value" id="last-update" style="font-size: 14px;">Never</div>
                     </div>
                 </div>
             </div>
-        </div>
-        
-        <!-- Chart Card -->
-        <div class="card">
-            <h2>
-                <span class="icon">📊</span>
-                Real-Time Tracking History
-            </h2>
-            <div class="chart-container">
-                <canvas id="tracking-chart"></canvas>
+            
+            <!-- Charts -->
+            <div class="grid grid-2">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon">📊</div>
+                        <div class="card-title">Position Tracking</div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="position-chart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon">🎯</div>
+                        <div class="card-title">Confidence History</div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="confidence-chart"></canvas>
+                    </div>
+                </div>
             </div>
-        </div>
-        
-        <!-- Message Log Card -->
-        <div class="card">
-            <h2>
-                <span class="icon">📝</span>
-                Message Log
-            </h2>
-            <div class="message-log" id="message-log"></div>
+            
+            <!-- Message Log -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">📝</div>
+                    <div class="card-title">Activity Log</div>
+                </div>
+                <div class="log-container" id="log-container"></div>
+            </div>
         </div>
     </div>
     
     <script>
-        // CONFIGURATION
-        const TEAM_ID = 'BACK-BENCHERS';
-        const WS_URL = 'ws://localhost:9002';
+        // ===== CONFIGURATION =====
+        const CONFIG = {
+            WS_URL: 'ws://localhost:9002',
+            TEAM_ID: 'BACK-BENCHERS',
+            MAX_LOG_ENTRIES: 100,
+            CHART_MAX_POINTS: 50
+        };
         
-        // Global Variables
-        let ws = null;
-        let messageCount = 0;
-        let startTime = Date.now();
-        let reconnectAttempts = 0;
-        const MAX_LOG_MESSAGES = 50;
-
-        // Chart Setup
-        const ctx = document.getElementById('tracking-chart').getContext('2d');
-        const chart = new Chart(ctx, {
+        // ===== STATE =====
+        let state = {
+            connected: false,
+            messageCount: 0,
+            startTime: Date.now(),
+            lastMessageTime: null,
+            messageRate: 0,
+            faceDetected: false
+        };
+        
+        // ===== CHARTS =====
+        const positionCtx = document.getElementById('position-chart').getContext('2d');
+        const confidenceCtx = document.getElementById('confidence-chart').getContext('2d');
+        
+        const positionChart = new Chart(positionCtx, {
             type: 'line',
             data: {
-                datasets: [
-                    {
-                        label: 'Face Position (X)',
-                        data: [],
-                        borderColor: '#3b82f6',
-                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                        tension: 0.4
-                    }
-                ]
+                labels: [],
+                datasets: [{
+                    label: 'Face X Position',
+                    data: [],
+                    borderColor: '#6366f1',
+                    backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    pointRadius: 0,
+                    borderWidth: 2
+                }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
                 scales: {
-                    x: {
-                        type: 'realtime',
-                        realtime: {
-                            duration: 30000,
-                            refresh: 1000,
-                            delay: 1000
-                        }
-                    },
-                    y: {
-                        beginAtZero: true,
-                        max: 640
-                    }
-                },
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'top'
-                    }
+                    y: { min: 0, max: 640 }
                 }
             }
         });
         
-        // UI Update Functions
-        function updateConnectionStatus(connected) {
-            const statusEl = document.getElementById('ws-status');
+        const confidenceChart = new Chart(confidenceCtx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Detection Confidence',
+                    data: [],
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    pointRadius: 0,
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { min: 0, max: 1 }
+                }
+            }
+        });
+        
+        // ===== UTILITY FUNCTIONS =====
+        function addLog(type, message) {
+            const container = document.getElementById('log-container');
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            
+            const time = new Date().toLocaleTimeString();
+            entry.innerHTML = `
+                <span class="log-time">${time}</span>
+                <span class="log-message ${type}">${message}</span>
+            `;
+            
+            container.insertBefore(entry, container.firstChild);
+            
+            while (container.children.length > CONFIG.MAX_LOG_ENTRIES) {
+                container.removeChild(container.lastChild);
+            }
+        }
+        
+        function updateStatus(connected) {
+            state.connected = connected;
+            const dot = document.getElementById('status-dot');
+            const text = document.getElementById('status-text');
+            
             if (connected) {
-                statusEl.className = 'status-badge connected';
-                statusEl.innerHTML = '<div class="led" style="background: #10b981;"></div><span>Connected</span>';
+                dot.classList.remove('disconnected');
+                dot.classList.add('connected');
+                text.textContent = 'Connected';
             } else {
-                statusEl.className = 'status-badge disconnected';
-                statusEl.innerHTML = '<div class="led" style="background: #ef4444;"></div><span>Disconnected</span>';
+                dot.classList.remove('connected');
+                dot.classList.add('disconnected');
+                text.textContent = 'Disconnected';
             }
         }
         
-        function updateMovementDisplay(status) {
-            const leftArrow = document.getElementById('arrow-left');
-            const rightArrow = document.getElementById('arrow-right');
-            const faceIcon = document.getElementById('face-icon');
-            const statusText = document.getElementById('status-text');
+        function updateChart(chart, maxPoints, value) {
+            const now = new Date().toLocaleTimeString();
+            chart.data.labels.push(now);
+            chart.data.datasets[0].data.push(value);
             
-            // Reset all
-            leftArrow.classList.remove('active');
-            rightArrow.classList.remove('active');
-            faceIcon.classList.remove('active');
-            
-            statusText.textContent = status;
-            
-            switch(status) {
-                case 'MOVE_LEFT':
-                    leftArrow.classList.add('active');
-                    statusText.style.color = '#3b82f6';
-                    break;
-                case 'MOVE_RIGHT':
-                    rightArrow.classList.add('active');
-                    statusText.style.color = '#3b82f6';
-                    break;
-                case 'CENTERED':
-                    faceIcon.classList.add('active');
-                    statusText.style.color = '#10b981';
-                    break;
-                case 'NO_FACE':
-                    faceIcon.textContent = '❌';
-                    statusText.style.color = '#ef4444';
-                    setTimeout(() => faceIcon.textContent = '😊', 1000);
-                    break;
+            if (chart.data.labels.length > maxPoints) {
+                chart.data.labels.shift();
+                chart.data.datasets[0].data.shift();
             }
+            
+            chart.update('quiet');
         }
         
-        function addLogMessage(type, message) {
-            const logEl = document.getElementById('message-log');
-            const timestamp = new Date().toLocaleTimeString();
-            const div = document.createElement('div');
-            div.innerHTML = `<span class="timestamp">[${timestamp}]</span> ${type}: ${message}`;
-            logEl.insertBefore(div, logEl.firstChild);
-            
-            // Limit log size
-            while (logEl.children.length > MAX_LOG_MESSAGES) {
-                logEl.removeChild(logEl.lastChild);
-            }
-        }
-        
-        // WebSocket Connection
+        // ===== WEBSOCKET =====
         function connectWebSocket() {
-            addLogMessage('System', 'Connecting to backend...');
+            addLog('info', 'Connecting to backend...');
             
-            ws = new WebSocket(WS_URL);
+            const ws = new WebSocket(CONFIG.WS_URL);
             
             ws.onopen = () => {
-                console.log('✓ WebSocket connected');
-                updateConnectionStatus(true);
-                addLogMessage('System', 'Connected to backend');
-                reconnectAttempts = 0;
+                updateStatus(true);
+                addLog('success', 'Connected to backend');
             };
             
             ws.onmessage = (event) => {
                 try {
-                    const message = JSON.parse(event.data);
-                    messageCount++;
-                    document.getElementById('msg-count').textContent = messageCount;
+                    const msg = JSON.parse(event.data);
+                    state.messageCount++;
                     
-                    if (message.type === 'movement') {
-                        handleMovementMessage(message.data);
-                    } else if (message.type === 'heartbeat') {
-                        handleHeartbeatMessage(message.data);
-                    } else if (message.type === 'device_status') {
-                        handleDeviceStatus(message.data);
+                    if (msg.type === 'movement') {
+                        handleMovement(msg.data);
+                    } else if (msg.type === 'heartbeat') {
+                        handleHeartbeat(msg.data);
                     }
-                } catch (error) {
-                    console.error('Error parsing message:', error);
+                } catch (e) {
+                    console.error('Parse error:', e);
                 }
             };
             
             ws.onclose = () => {
-                console.log('✗ WebSocket disconnected');
-                updateConnectionStatus(false);
-                addLogMessage('System', 'Disconnected from backend');
-                
-                // Attempt reconnection
-                reconnectAttempts++;
-                const delay = Math.min(5000, 1000 * reconnectAttempts);
-                setTimeout(connectWebSocket, delay);
+                updateStatus(false);
+                addLog('error', 'Connection lost, reconnecting...');
+                setTimeout(connectWebSocket, 3000);
             };
             
-            ws.onerror = (error) => {
-                console.error('WebSocket error:', error);
-                addLogMessage('Error', 'Connection error');
+            ws.onerror = (e) => {
+                addLog('error', 'Connection error');
             };
         }
         
-        // Message Handlers
-        function handleMovementMessage(data) {
-            const { status, confidence, face_position } = data;
+        // ===== MESSAGE HANDLERS =====
+        function handleMovement(data) {
+            const { status, face_position, confidence } = data;
             
-            updateMovementDisplay(status);
+            document.getElementById('detection-status').textContent = status;
             document.getElementById('confidence').textContent = confidence.toFixed(2);
+            document.getElementById('face-position').textContent = 
+                face_position ? `${Math.round(face_position.x)}, ${Math.round(face_position.y)}` : '–';
             document.getElementById('last-update').textContent = new Date().toLocaleTimeString();
             
-            addLogMessage('Movement', `${status} (${confidence.toFixed(2)})`);
+            // Update visualization
+            const detected = status !== 'NO_FACE';
+            const faceDisplay = document.getElementById('face-display');
+            const arrowLeft = document.getElementById('arrow-left');
+            const arrowRight = document.getElementById('arrow-right');
             
-            // Update chart
-            if (face_position && face_position.x) {
-                chart.data.datasets[0].data.push({
-                    x: Date.now(),
-                    y: face_position.x
-                });
-                chart.update('quiet');
+            faceDisplay.classList.toggle('detected', detected);
+            faceDisplay.classList.toggle('lost', !detected);
+            arrowLeft.classList.toggle('active', status === 'MOVE_LEFT');
+            arrowRight.classList.toggle('active', status === 'MOVE_RIGHT');
+            
+            // Update charts
+            if (face_position) {
+                updateChart(positionChart, CONFIG.CHART_MAX_POINTS, face_position.x);
             }
+            updateChart(confidenceChart, CONFIG.CHART_MAX_POINTS, confidence);
+            
+            addLog('info', `Face ${status} (${confidence.toFixed(2)})`);
         }
         
-        function handleHeartbeatMessage(data) {
+        function handleHeartbeat(data) {
             if (data.node === 'pc') {
-                document.getElementById('pc-status').textContent = data.status;
+                document.getElementById('vision-status').textContent = 
+                    data.status === 'ONLINE' ? '🟢 Online' : '🔴 Offline';
+                document.getElementById('vision-heartbeat').textContent = new Date().toLocaleTimeString();
             } else if (data.node === 'esp8266') {
-                document.getElementById('esp-status').textContent = data.status;
+                document.getElementById('esp-status').textContent = 
+                    data.status === 'ONLINE' ? '🟢 Online' : '🔴 Offline';
                 if (data.angle !== undefined) {
-                    document.getElementById('servo-angle').textContent = data.angle + '°';
+                    document.getElementById('servo-angle').textContent = `${data.angle}°`;
                 }
             }
         }
         
-        function handleDeviceStatus(data) {
-            addLogMessage('Device', `Status: ${data.status || 'unknown'}`);
-        }
-        
-        // Uptime Counter
-        setInterval(() => {
-            const uptime = Math.floor((Date.now() - startTime) / 1000);
-            const minutes = Math.floor(uptime / 60);
-            const seconds = uptime % 60;
-            document.getElementById('uptime').textContent = `${minutes}m ${seconds}s`;
-        }, 1000);
-        
-        // Initialize
-        document.getElementById('team-id').textContent = TEAM_ID;
+        // ===== INITIALIZE =====
         connectWebSocket();
-        
-        console.log('Dashboard initialized');
-        console.log('Team ID:', TEAM_ID);
-        console.log('WebSocket URL:', WS_URL);
+        addLog('info', `Dashboard loaded - Team: ${CONFIG.TEAM_ID}`);
     </script>
 </body>
 </html>
