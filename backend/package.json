@@ -1,0 +1,20 @@
+{
+    "name": "face-servo-backend",
+    "version": "1.0.0",
+    "description": "Backend API service for distributed face-tracking servo system",
+    "main": "server.js",
+    "scripts": {
+      "start": "node server.js",
+      "dev": "nodemon server.js"
+    },
+    "keywords": ["mqtt", "websocket", "iot", "face-tracking"],
+    "author": "Back-benchers",
+    "license": "MIT",
+    "dependencies": {
+      "mqtt": "^5.3.0",
+      "ws": "^8.16.0"
+    },
+    "devDependencies": {
+      "nodemon": "^3.0.2"
+    }
+  }

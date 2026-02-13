@@ -1,0 +1,3 @@
+opencv-python
+paho-mqtt
+numpy
