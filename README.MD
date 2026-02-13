@@ -472,5 +472,12 @@ This project is licensed under the MIT License - see LICENSE file for details.
 
 ---
 
+## 🔗 References
+
+- **Gabriel Baziramwabo** – [ResearchGate](https://www.researchgate.net/profile/Gabriel-Baziramwabo)
+- **BenaxMedia** – [YouTube Channel](https://www.youtube.com/@BenaxMedia)
+
+---
+
 **Last Updated**: February 2026  
 **Status**: ✅ Active Development
