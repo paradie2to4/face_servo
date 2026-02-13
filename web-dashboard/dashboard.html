@@ -433,6 +433,157 @@
             background: rgba(99, 102, 241, 0.5);
         }
         
+        /* Settings Button */
+        .settings-btn {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .settings-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 28px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .modal-close:hover {
+            color: var(--primary);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px 12px;
+            background: rgba(99, 102, 241, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.1);
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+        }
+        
+        .button-group button {
+            flex: 1;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .button-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+        
+        .button-primary:hover {
+            opacity: 0.9;
+        }
+        
+        .button-secondary {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+        
+        .button-secondary:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        
+        .info-box {
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+        
         /* Responsive */
         @media (max-width: 768px) {
             .layout {
@@ -470,6 +621,7 @@
                 <div class="logo">🎯 Face-Servo</div>
             </div>
             <div class="header-right">
+                <button class="settings-btn" id="settings-btn" title="Settings">⚙️</button>
                 <div class="status-indicator">
                     <div class="status-dot disconnected" id="status-dot"></div>
                     <span id="status-text">Disconnected</span>
@@ -640,14 +792,78 @@
         </div>
     </div>
     
+    <!-- Settings Modal -->
+    <div class="modal" id="settings-modal">
+        <div class="modal-content" style="position: relative;">
+            <button class="modal-close" id="modal-close">✕</button>
+            <div class="modal-header">⚙️ Configuration</div>
+            
+            <div class="info-box">
+                📌 Configure your VPS connection settings. Changes are saved automatically.
+            </div>
+            
+            <div class="form-group">
+                <label>Backend URL (WebSocket)</label>
+                <input type="text" id="vps-url" placeholder="ws://your-vps-ip:9002" value="ws://localhost:9002">
+                <small style="color: var(--text-tertiary); font-size: 12px; margin-top: 5px; display: block;">
+                    Example: ws://157.173.101.159:9002 or wss://your-domain.com:9002
+                </small>
+            </div>
+            
+            <div class="form-group">
+                <label>Team ID</label>
+                <input type="text" id="team-id-input" placeholder="BACK-BENCHERS" value="BACK-BENCHERS">
+            </div>
+            
+            <div class="form-group">
+                <label>Quick Connect</label>
+                <select id="preset-select">
+                    <option value="">-- Or choose from presets --</option>
+                    <option value="ws://localhost:9002">Local (localhost)</option>
+                    <option value="ws://157.173.101.159:9002">Your VPS (157.173.101.159)</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Max Log Entries</label>
+                <input type="number" id="max-logs" min="10" max="500" value="100">
+            </div>
+            
+            <div class="form-group">
+                <label style="display: flex; align-items: center; gap: 8px;">
+                    <input type="checkbox" id="auto-reconnect" checked>
+                    Auto-reconnect on disconnect
+                </label>
+            </div>
+            
+            <div class="button-group">
+                <button class="button-primary" id="save-settings">Save Settings</button>
+                <button class="button-secondary" id="close-settings">Close</button>
+            </div>
+            
+            <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border-color);">
+                <p style="color: var(--text-tertiary); font-size: 12px; margin-bottom: 10px;">Current Connection:</p>
+                <div style="background: rgba(1, 6, 23, 0.5); padding: 10px; border-radius: 6px; font-family: monospace; font-size: 12px; color: var(--text-secondary);">
+                    <div id="current-url" style="word-break: break-all;">ws://localhost:9002</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <script>
+        // ===== LOAD SETTINGS FROM STORAGE =====
+        function loadSettings() {
+            return {
+                WS_URL: localStorage.getItem('WS_URL') || 'ws://localhost:9002',
+                TEAM_ID: localStorage.getItem('TEAM_ID') || 'BACK-BENCHERS',
+                MAX_LOG_ENTRIES: parseInt(localStorage.getItem('MAX_LOG_ENTRIES')) || 100,
+                CHART_MAX_POINTS: 50,
+                AUTO_RECONNECT: localStorage.getItem('AUTO_RECONNECT') !== 'false'
+            };
+        }
+        
         // ===== CONFIGURATION =====
-        const CONFIG = {
-            WS_URL: 'ws://localhost:9002',
-            TEAM_ID: 'BACK-BENCHERS',
-            MAX_LOG_ENTRIES: 100,
-            CHART_MAX_POINTS: 50
-        };
+        const CONFIG = loadSettings();
         
         // ===== STATE =====
         let state = {
@@ -656,7 +872,8 @@
             startTime: Date.now(),
             lastMessageTime: null,
             messageRate: 0,
-            faceDetected: false
+            faceDetected: false,
+            ws: null
         };
         
         // ===== CHARTS =====
@@ -766,6 +983,7 @@
             addLog('info', 'Connecting to backend...');
             
             const ws = new WebSocket(CONFIG.WS_URL);
+            state.ws = ws;  // Store for later reference
             
             ws.onopen = () => {
                 updateStatus(true);
@@ -789,8 +1007,12 @@
             
             ws.onclose = () => {
                 updateStatus(false);
-                addLog('error', 'Connection lost, reconnecting...');
-                setTimeout(connectWebSocket, 3000);
+                if (CONFIG.AUTO_RECONNECT) {
+                    addLog('error', 'Connection lost, reconnecting...');
+                    setTimeout(connectWebSocket, 3000);
+                } else {
+                    addLog('error', 'Connection lost');
+                }
             };
             
             ws.onerror = (e) => {
@@ -842,9 +1064,91 @@
             }
         }
         
+        // ===== SETTINGS MODAL =====
+        function initializeSettings() {
+            const modal = document.getElementById('settings-modal');
+            const settingsBtn = document.getElementById('settings-btn');
+            const modalClose = document.getElementById('modal-close');
+            const closeBtn = document.getElementById('close-settings');
+            const saveBtn = document.getElementById('save-settings');
+            const presetSelect = document.getElementById('preset-select');
+            
+            // Load current settings into form
+            document.getElementById('vps-url').value = CONFIG.WS_URL;
+            document.getElementById('team-id-input').value = CONFIG.TEAM_ID;
+            document.getElementById('max-logs').value = CONFIG.MAX_LOG_ENTRIES;
+            document.getElementById('auto-reconnect').checked = CONFIG.AUTO_RECONNECT;
+            document.getElementById('current-url').textContent = CONFIG.WS_URL;
+            
+            // Open modal
+            settingsBtn.addEventListener('click', () => {
+                modal.classList.add('active');
+            });
+            
+            // Close modal
+            modalClose.addEventListener('click', () => modal.classList.remove('active'));
+            closeBtn.addEventListener('click', () => modal.classList.remove('active'));
+            
+            // Close on background click
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) modal.classList.remove('active');
+            });
+            
+            // Preset selection
+            presetSelect.addEventListener('change', (e) => {
+                if (e.target.value) {
+                    document.getElementById('vps-url').value = e.target.value;
+                    document.getElementById('preset-select').value = '';
+                }
+            });
+            
+            // Save settings
+            saveBtn.addEventListener('click', () => {
+                const newUrl = document.getElementById('vps-url').value;
+                const newTeamId = document.getElementById('team-id-input').value;
+                const newMaxLogs = document.getElementById('max-logs').value;
+                const autoReconnect = document.getElementById('auto-reconnect').checked;
+                
+                if (!newUrl) {
+                    alert('Please enter a valid backend URL');
+                    return;
+                }
+                
+                // Save to localStorage
+                localStorage.setItem('WS_URL', newUrl);
+                localStorage.setItem('TEAM_ID', newTeamId);
+                localStorage.setItem('MAX_LOG_ENTRIES', newMaxLogs);
+                localStorage.setItem('AUTO_RECONNECT', autoReconnect);
+                
+                // Update config
+                CONFIG.WS_URL = newUrl;
+                CONFIG.TEAM_ID = newTeamId;
+                CONFIG.MAX_LOG_ENTRIES = parseInt(newMaxLogs);
+                CONFIG.AUTO_RECONNECT = autoReconnect;
+                
+                // Update display
+                document.getElementById('current-url').textContent = newUrl;
+                
+                addLog('success', 'Settings saved successfully');
+                addLog('info', `New backend URL: ${newUrl}`);
+                
+                // Reconnect with new settings
+                if (state.ws) {
+                    state.ws.close();
+                }
+                setTimeout(() => {
+                    connectWebSocket();
+                }, 500);
+                
+                modal.classList.remove('active');
+            });
+        }
+        
         // ===== INITIALIZE =====
+        initializeSettings();
         connectWebSocket();
         addLog('info', `Dashboard loaded - Team: ${CONFIG.TEAM_ID}`);
+        addLog('info', `Backend URL: ${CONFIG.WS_URL}`);
     </script>
 </body>
 </html>

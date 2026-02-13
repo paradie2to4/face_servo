@@ -2,7 +2,9 @@
 
 A complete distributed vision-control system implementing real-time face tracking with servo motor actuation using MQTT messaging and WebSocket-based web visualization.
 
-**Live Demo**: [Dashboard URL] | **GitHub**: [paradie2to4/face_servo](https://github.com/paradie2to4/face_servo)
+**Live Dashboard**: [Access on VPS](http://157.173.101.159:9403/uploads/web-dashboard/dashboard.html) | **GitHub**: [paradie2to4/face_servo](https://github.com/paradie2to4/face_servo)
+
+> **📌 Live URL**: http://157.173.101.159:9403/uploads/web-dashboard/dashboard.html
 
 ---
 
@@ -75,6 +77,14 @@ Open `web-dashboard/dashboard.html` in your browser.
 
 ## 🌐 VPS Deployment
 
+### Dashboard Access
+Your dashboard is now live at:
+```
+http://157.173.101.159:9403/uploads/web-dashboard/dashboard.html
+```
+
+**Direct Link**: [Open Dashboard](http://157.173.101.159:9403/uploads/web-dashboard/dashboard.html)
+
 ### Step 1: Provision VPS
 ```bash
 # SSH into your VPS
@@ -93,11 +103,13 @@ sudo systemctl enable mosquitto
 sudo systemctl start mosquitto
 ```
 
-### Step 2: Deploy Backend
+### Step 2: Deploy Backend & Dashboard
 ```bash
-# Upload files
+# Upload dashboard to uploads folder (you've already done this!)
+scp -r web-dashboard/ user@your-vps-ip:~/uploads/
+
+# Upload backend to home directory
 scp -r backend/ user@your-vps-ip:/home/user/
-scp -r web-dashboard/ user@your-vps-ip:/home/user/
 
 # SSH into VPS
 ssh user@your-vps-ip
@@ -113,18 +125,16 @@ pm2 save
 pm2 startup
 ```
 
-### Step 3: Serve Dashboard
-```bash
-cd web-dashboard
-
-# Option A: Simple HTTP Server
-npx http-server -p 8080 -c-1
-
-# Option B: Nginx (recommended for production)
-sudo apt install -y nginx
-sudo cp dashboard.html /var/www/html/
-sudo systemctl restart nginx
+### Step 3: Dashboard Access
+Your dashboard is now available at:
 ```
+~/uploads/web-dashboard/dashboard.html
+```
+
+**Access in browser:**
+- Direct file: Open locally from VPS
+- Via HTTP: `http://YOUR-VPS-IP-OR-DOMAIN/uploads/web-dashboard/dashboard.html`
+- Via Nginx: Set up virtual host pointing to `~/uploads/` folder
 
 ### Step 4: Configure
 Update configuration in all three nodes:
@@ -145,6 +155,31 @@ MQTT_PORT = 1883
 ```javascript
 const WS_URL = 'wss://YOUR-VPS-IP:9002';  // or ws:// for non-HTTPS
 const MQTT_BROKER = 'mqtt://YOUR-VPS-IP:1883';
+```
+
+### Access Your VPS Dashboard
+
+Once deployed, access your dashboard using one of these methods:
+
+**1. From Your VPS (VMI2305190):**
+```bash
+# SSH into your VPS
+ssh user403@vmi2305190.contaboserver.com
+
+# View dashboard directly
+cat ~/uploads/web-dashboard/dashboard.html
+```
+
+**2. From Browser:**
+- **Direct Link**: [http://157.173.101.159:9403/uploads/web-dashboard/dashboard.html](http://157.173.101.159:9403/uploads/web-dashboard/dashboard.html)
+
+**3. Set up Web Server (Optional):**
+```bash
+# Using simple HTTP server
+cd ~/uploads/web-dashboard
+npx http-server -p 9403
+
+# Then access: http://157.173.101.159:9403/dashboard.html
 ```
 
 ---
